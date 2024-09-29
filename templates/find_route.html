@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Optimized Route - Tampa Hurricane Relief</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet"></script>
+  <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
+  <style>
+    #map {
+      height: 500px;
+      width: 100%;
+    }
+    .leaflet-routing-container {
+      display: none !important; /* Hides the routing instruction container */
+    }
+    .leaflet-popup-content-wrapper {
+      font-size: 0.7em; /* Reduces the popup text size */
+    }
+  </style>
+</head>
+<body class="bg-gray-100 text-gray-900">
+<header class="bg-black text-white p-4 text-center">
+    <a href="/">Back to Home</a>
+    <h1 class="text-3xl font-bold">Optimized Route - Tampa Hurricane Relief</h1>
+</header>
+
+<main class="container mx-auto py-6">
+  <section id="map-section" class="my-8">
+    <h2 class="text-2xl font-semibold mb-4">Optimized Route for Assistance</h2>
+    <div id="map" class="rounded-lg shadow-md"></div>
+  </section>
+  
+  <!-- Section to display the summarized route details and required materials -->
+  <section class="my-8">
+    <h2 class="text-2xl font-semibold mb-4">Route Summary with Material Requirements</h2>
+    <div id="route-summary" class="bg-white p-4 rounded-lg shadow-md">
+      <ul id="route-details" class="list-disc pl-4"></ul>
+    </div>
+  </section>
+</main>
+
+<footer class="bg-gray-800 text-white p-4 text-center">
+  <p>&copy; 2024 Tampa Hurricane Relief Hub. All Rights Reserved.</p>
+</footer>
+
+<script>
+// Initialize the Leaflet map centered on Tampa
+const map = L.map('map').setView([27.9506, -82.4572], 12); // Center the map on Tampa
+
+// Add OpenStreetMap tiles
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; OpenStreetMap contributors'
+}).addTo(map);
+
+// Define coordinates for each stop
+const positions = {
+  "Depot": [27.9506, -82.4572], 
+  "33602": [27.9483, -82.4585],
+  "33603": [27.9769, -82.4715],
+  "33604": [28.0116, -82.4551],
+  "33605": [27.910225, -82.366026],
+  "33609": [27.9432, -82.5255],
+  "33610": [28.0051, -82.5076],
+  "33614": [27.9988, -82.5066],
+  "33615": [27.9992, -82.5910]
+};
+
+// Define required materials for each zip code
+const materialRequirements = {
+  "33602": ["Water", "Canned Food", "Medical Kits"],
+  "33603": ["Blankets", "Diapers", "Flashlights"],
+  "33604": ["Baby Formula", "First Aid Supplies"],
+  "33605": ["Non-perishable Food", "Toiletries"],
+  "33609": ["Batteries", "Cleaning Supplies"],
+  "33610": ["Water", "Sanitation Kits"],
+  "33614": ["Medical Supplies", "Canned Food"],
+  "33615": ["Water", "Flashlights", "Batteries"]
+};
+
+// Define the optimal route
+const optimalRoute = ["Depot", "33602", "33603", "33604", "33605", "33609", "33610", "33614", "33615"];
+
+// Define custom icons for high and medium priority stops
+const redIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+  iconSize: [15, 24], // Smaller icon size
+  iconAnchor: [7.5, 24], 
+  popupAnchor: [1, -20]
+});
+const yellowIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-yellow.png',
+  iconSize: [15, 24], // Smaller icon size
+  iconAnchor: [7.5, 24], 
+  popupAnchor: [1, -20]
+});
+
+// Add markers with smaller icons and minimized popup content
+optimalRoute.forEach((zip, index) => {
+  const icon = (index === 0 || zip === "33602" || zip === "33603" || zip === "33609" || zip === "33614") ? redIcon : yellowIcon;
+  const marker = L.marker(positions[zip], { icon: icon }).addTo(map);
+  marker.bindPopup(`<strong>Stop ${index + 1}</strong> - Zip: ${zip}`);
+});
+
+// Create an array of coordinates for the optimal route
+const coordinates = optimalRoute.map(zip => positions[zip]);
+
+// Add routing with polyline following streets, without text overlay
+const routingControl = L.Routing.control({
+  waypoints: coordinates.map(([lat, lng]) => L.latLng(lat, lng)),
+  router: L.Routing.osrmv1({
+    serviceUrl: 'https://router.project-osrm.org/route/v1'
+  }),
+  lineOptions: {
+    styles: [{ color: 'blue', weight: 4, opacity: 0.7 }]
+  },
+  createMarker: () => { return null; }, // Avoid adding default markers
+  showAlternatives: false, 
+  fitSelectedRoutes: true,
+  addWaypoints: false,
+  routeWhileDragging: false,
+  draggableWaypoints: false,
+  show: false
+}).addTo(map);
+
+// Forcefully hide the directions overlay
+map.on('routeselected', () => {
+  setTimeout(() => {
+    const controlContainer = document.querySelector('.leaflet-routing-container');
+    if (controlContainer) {
+      controlContainer.style.display = 'none';
+    }
+  }, 100);
+});
+
+// Display summarized route details with material requirements
+const routeDetailsElement = document.getElementById('route-details');
+optimalRoute.forEach((zip, index) => {
+  const li = document.createElement('li');
+  li.textContent = `Stop ${index + 1}: Zip Code ${zip} - Materials Needed: ${materialRequirements[zip] ? materialRequirements[zip].join(', ') : 'None'}`;
+  routeDetailsElement.appendChild(li);
+});
+</script>
+</body>
+</html>

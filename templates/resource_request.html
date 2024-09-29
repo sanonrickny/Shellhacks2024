@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resource Request - Tactical Response City</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background-color: #111;
+            color: #ffffff;
+        }
+
+        #content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 10px;
+        }
+
+        h1 {
+            color: #00ffcc;
+        }
+
+        label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+
+        input[type="text"], input[type="number"], select, textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0 15px;
+            border: 1px solid #333;
+            border-radius: 5px;
+            background-color: #222;
+            color: #fff;
+        }
+
+        input[type="submit"] {
+            padding: 10px 20px;
+            background-color: #00ffcc;
+            border: none;
+            border-radius: 5px;
+            color: #111;
+            cursor: pointer;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #f39c12;
+        }
+
+        a {
+            color: #00ffcc;
+            text-decoration: none;
+        }
+
+        a:hover {
+            color: #f39c12;
+        }
+
+        /* Popup styling */
+        #popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #222;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            z-index: 999;
+            border: 2px solid #00ffcc;
+        }
+
+        #popup h2 {
+            color: #00ffcc;
+        }
+
+        #popup .checkmark {
+            font-size: 48px;
+            color: #00ffcc;
+        }
+
+        #popup button {
+            margin-top: 15px;
+            padding: 10px 20px;
+            background-color: #00ffcc;
+            border: none;
+            border-radius: 5px;
+            color: #111;
+            cursor: pointer;
+        }
+
+        #popup button:hover {
+            background-color: #f39c12;
+        }
+
+        #overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 998;
+        }
+    </style>
+</head>
+<body>
+<div id="content">
+    <h1>Resource Request Portal</h1>
+    <p>Please fill out the form below to request essential resources for your current operation. This will help ensure that you have the necessary tools and supplies during emergency responses.</p>
+    
+    <form id="resourceForm" onsubmit="showPopup(event)">
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name" required>
+        
+        <label for="department">Department/Unit</label>
+        <input type="text" id="department" name="department" required>
+        
+        <label for="resource">Select Resource Type</label>
+        <select id="resource" name="resource" required>
+            <option value="" disabled selected>Select a resource</option>
+            <option value="Medical Supplies">Medical Supplies</option>
+            <option value="Protective Gear">Protective Gear</option>
+            <option value="Rescue Equipment">Rescue Equipment</option>
+            <option value="Communication Devices">Communication Devices</option>
+            <option value="Food & Water">Food & Water</option>
+            <option value="Shelter Equipment">Shelter Equipment</option>
+            <option value="Other">Other</option>
+        </select>
+        
+        <label for="quantity">Quantity Needed</label>
+        <input type="number" id="quantity" name="quantity" min="1" required>
+        
+        <label for="urgency">Urgency Level</label>
+        <select id="urgency" name="urgency" required>
+            <option value="Normal">Normal</option>
+            <option value="High">High</option>
+            <option value="Critical">Critical</option>
+        </select>
+        
+        <label for="description">Description/Reason for Request</label>
+        <textarea id="description" name="description" rows="4" placeholder="Provide additional details about why this resource is needed..." required></textarea>
+        
+        <input type="submit" value="Submit Request">
+    </form>
+    
+    <p><a href="{{ url_for('index') }}">Back to Home</a></p>
+</div>
+
+<!-- Popup and Overlay -->
+<div id="overlay"></div>
+<div id="popup">
+    <div class="checkmark">✔</div>
+    <h2>Request Submitted!</h2>
+    <p>Your resource request has been successfully submitted.</p>
+    <button onclick="closePopup()">Close</button>
+</div>
+
+<script>
+    function showPopup(event) {
+        event.preventDefault(); // Prevent the form from submitting normally
+        document.getElementById("overlay").style.display = "block";
+        document.getElementById("popup").style.display = "block";
+    }
+
+    function closePopup() {
+        document.getElementById("overlay").style.display = "none";
+        document.getElementById("popup").style.display = "none";
+        document.getElementById("resourceForm").reset(); // Reset the form fields
+    }
+</script>
+</body>
+</html>

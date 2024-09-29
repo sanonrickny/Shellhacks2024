@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>First Responder Dashboard - Tampa Hurricane Relief</title>
+ <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+ <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+ <style>
+   #map {
+     height: 500px;
+     width: 100%;
+   }
+   .priority-high {
+     background-color: #f87171; /* Red for high priority */
+     color: white;
+   }
+   .priority-medium {
+     background-color: #fbbf24; /* Yellow for medium priority */
+     color: black;
+   }
+   .priority-low {
+     background-color: #34d399; /* Green for low priority */
+     color: white;
+   }
+ </style>
+</head>
+<body class="bg-teal-400 text-gray-900">
+
+
+<header class="bg-black text-white p-4 text-center">
+   <a href="{{ url_for('index') }}">Back to Home</a>
+   <h1 class="text-3xl font-bold">First Responder Dashboard - Tampa Hurricane Relief</h1>
+   <p>Helping first responders prioritize areas based on the severity of need in the aftermath of a hurricane.</p>
+ </header>
+
+
+ <main class="container mx-auto py-6">
+  
+   <!-- Map Section -->
+   <section class="my-8">
+     <h2 class="text-2xl font-semibold mb-4">Affected Zones and Shelters</h2>
+     <div id="map" class="rounded-lg shadow-md"></div>
+   </section>
+
+
+   <!-- Zip Code Priority List -->
+   <section class="my-8">
+     <h2 class="text-2xl font-semibold mb-4">Priority Zip Codes for Assistance</h2>
+     <div class="bg-white p-6 rounded-lg shadow-md">
+       <table class="w-full table-auto">
+         <thead>
+           <tr>
+             <th class="px-4 py-2">Zip Code</th>
+             <th class="px-4 py-2">Current Status</th>
+             <th class="px-4 py-2">Priority Level</th>
+           </tr>
+         </thead>
+         <tbody>
+           <tr class="priority-high">
+             <td class="border px-4 py-2">33602</td>
+             <td class="border px-4 py-2">Severe flooding, no power, shelter full</td>
+             <td class="border px-4 py-2 font-bold">High</td>
+           </tr>
+           <tr class="priority-high">
+             <td class="border px-4 py-2">33603</td>
+             <td class="border px-4 py-2">Roads blocked, shelter near full capacity</td>
+             <td class="border px-4 py-2 font-bold">High</td>
+           </tr>
+           <tr class="priority-medium">
+             <td class="border px-4 py-2">33604</td>
+             <td class="border px-4 py-2">Moderate damage, roads partially blocked</td>
+             <td class="border px-4 py-2 font-bold">Medium</td>
+           </tr>
+           <tr class="priority-low">
+             <td class="border px-4 py-2">33605</td>
+             <td class="border px-4 py-2">Minor damage, resources available</td>
+             <td class="border px-4 py-2 font-bold">Low</td>
+           </tr>
+           <tr class="priority-high">
+             <td class="border px-4 py-2">33606</td>
+             <td class="border px-4 py-2">Severe damage, medical assistance needed</td>
+             <td class="border px-4 py-2 font-bold">High</td>
+           </tr>
+           <tr class="priority-medium">
+             <td class="border px-4 py-2">33607</td>
+             <td class="border px-4 py-2">Minor flooding, shelter operational</td>
+             <td class="border px-4 py-2 font-bold">Medium</td>
+           </tr>
+           <tr class="priority-low">
+             <td class="border px-4 py-2">33609</td>
+             <td class="border px-4 py-2">No major damage, supplies available</td>
+             <td class="border px-4 py-2 font-bold">Low</td>
+           </tr>
+           <tr class="priority-high">
+             <td class="border px-4 py-2">33610</td>
+             <td class="border px-4 py-2">Significant flooding, power outage</td>
+             <td class="border px-4 py-2 font-bold">High</td>
+           </tr>
+           <tr class="priority-medium">
+             <td class="border px-4 py-2">33611</td>
+             <td class="border px-4 py-2">Road blockages, moderate damage</td>
+             <td class="border px-4 py-2 font-bold">Medium</td>
+           </tr>
+           <tr class="priority-low">
+             <td class="border px-4 py-2">33612</td>
+             <td class="border px-4 py-2">Minimal damage, low resource need</td>
+             <td class="border px-4 py-2 font-bold">Low</td>
+           </tr>
+           <tr class="priority-high">
+             <td class="border px-4 py-2">33613</td>
+             <td class="border px-4 py-2">Severe flooding, road closures</td>
+             <td class="border px-4 py-2 font-bold">High</td>
+           </tr>
+           <tr class="priority-medium">
+             <td class="border px-4 py-2">33614</td>
+             <td class="border px-4 py-2">Minor damage, ongoing road clearing</td>
+             <td class="border px-4 py-2 font-bold">Medium</td>
+           </tr>
+           <tr class="priority-low">
+             <td class="border px-4 py-2">33615</td>
+             <td class="border px-4 py-2">No major damage, minimal resource need</td>
+             <td class="border px-4 py-2 font-bold">Low</td>
+           </tr>
+           <tr class="priority-high">
+             <td class="border px-4 py-2">33616</td>
+             <td class="border px-4 py-2">Major flooding, medical supplies needed</td>
+             <td class="border px-4 py-2 font-bold">High</td>
+           </tr>
+         </tbody>
+       </table>
+     </div>
+   </section>
+
+
+   <!-- Find Optimal Route Button -->
+   <section class="my-8 text-center">
+    
+     <a href="{{url_for('find_route')}}"><button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700">Find Optimal Route</button></a>
+    
+   </section>
+
+
+ </main>
+
+
+ <footer class="bg-gray-800 text-white p-4 text-center">
+   <p>&copy; 2024 Tampa Hurricane Relief Hub. All Rights Reserved.</p>
+ </footer>
+
+
+ <!-- Leaflet.js and OpenStreetMap -->
+ <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+ <script>
+   // Initialize Leaflet map centered on Tampa
+   const map = L.map('map').setView([27.9506, -82.4572], 12); // Center the map on Tampa
+
+
+   // Add OpenStreetMap tiles
+   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+   }).addTo(map);
+
+
+   // Define custom icons for different priority levels
+   const redIcon = new L.Icon({
+     iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+     iconSize: [25, 41],
+     iconAnchor: [12, 41],
+     popupAnchor: [1, -34],
+     shadowSize: [41, 41]
+   });
+   const yellowIcon = new L.Icon({
+     iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-yellow.png',
+     iconSize: [25, 41],
+     iconAnchor: [12, 41],
+     popupAnchor: [1, -34],
+     shadowSize: [41, 41]
+   });
+   const greenIcon = new L.Icon({
+     iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
+     iconSize: [25, 41],
+     iconAnchor: [12, 41],
+     popupAnchor: [1, -34],
+     shadowSize: [41, 41]
+   });
+
+
+   // Correct coordinates for each zip code
+   const zipCodes = [
+     { coords: [27.9514, -82.4566], zip: "33602", name: "Severe flooding, shelter full", priority: "high" },
+     { coords: [27.9798, -82.4695], zip: "33603", name: "Roads blocked, shelter near full", priority: "high" },
+     { coords: [28.0085, -82.4515], zip: "33604", name: "Moderate damage, roads blocked", priority: "medium" },
+     { coords: [27.9603, -82.4392], zip: "33605", name: "Minor damage, resources available", priority: "low" },
+     { coords: [27.9334, -82.4693], zip: "33606", name: "Severe damage, medical assistance needed", priority: "high" },
+     { coords: [27.9633, -82.4954], zip: "33607", name: "Minor flooding, shelter operational", priority: "medium" },
+     { coords: [27.9456, -82.5224], zip: "33609", name: "No major damage, supplies available", priority: "low" },
+     { coords: [27.9988, -82.4146], zip: "33610", name: "Significant flooding, power outage", priority: "high" },
+     { coords: [27.8918, -82.5091], zip: "33611", name: "Road blockages, moderate damage", priority: "medium" },
+     { coords: [28.0480, -82.4517], zip: "33612", name: "Minimal damage, low resource need", priority: "low" },
+     { coords: [28.0787, -82.4494], zip: "33613", name: "Severe flooding, road closures", priority: "high" },
+     { coords: [28.0051, -82.5076], zip: "33614", name: "Minor damage, ongoing road clearing", priority: "medium" },
+     { coords: [28.0087, -82.5928], zip: "33615", name: "No major damage, minimal resource need", priority: "low" },
+     { coords: [27.8565, -82.5285], zip: "33616", name: "Major flooding, medical supplies needed", priority: "high" },
+   ];
+
+
+   // Add markers with color-coding for priority levels
+   zipCodes.forEach(zip => {
+     let icon;
+     if (zip.priority === "high") {
+       icon = redIcon;
+     } else if (zip.priority === "medium") {
+       icon = yellowIcon;
+     } else {
+       icon = greenIcon;
+     }
+
+
+     const marker = L.marker(zip.coords, { icon: icon }).addTo(map);
+     marker.bindPopup(`<strong>Zip Code: ${zip.zip}</strong><br>${zip.name}`).openPopup();
+   });
+ </script>
+
+
+</body>
+</html>
+
+
+

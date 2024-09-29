@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact - Tactical Response City</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background-color: #111;
+            color: #ffffff;
+        }
+
+        #content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #00ffcc;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            color: #f39c12;
+            margin-top: 30px;
+            margin-bottom: 10px;
+        }
+
+        p {
+            margin: 5px 0;
+            font-size: 16px;
+        }
+
+        .team {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .team-member {
+            background: rgba(50, 50, 50, 0.9);
+            padding: 15px;
+            margin: 10px;
+            border-radius: 10px;
+            width: 200px;
+        }
+
+        .team-member h3 {
+            color: #00ffcc;
+            margin-bottom: 5px;
+            font-size: 18px;
+        }
+
+        .team-member p {
+            color: #cccccc;
+            font-size: 14px;
+        }
+
+        a {
+            color: #00ffcc;
+            text-decoration: none;
+        }
+
+        a:hover {
+            color: #f39c12;
+        }
+    </style>
+</head>
+<body>
+<div id="content">
+    <h1>Contact Us</h1>
+    <p>If you have any questions or need further information about Tactical Response City, feel free to reach out to us.</p>
+
+    <h2>Meet Our Team</h2>
+    <div class="team">
+        <div class="team-member">
+            <h3>Andres Cardoso</h3>
+            <p>Lead Developer & Designer</p>
+            <p>Email: andres.cardoso@example.com</p>
+        </div>
+        <div class="team-member">
+            <h3>Marvin Guerro</h3>
+            <p>Data Analyst & Researcher</p>
+            <p>Email: marvin.guerro@example.com</p>
+        </div>
+        <div class="team-member">
+            <h3>Rickny Sanon</h3>
+            <p>UI/UX Specialist</p>
+            <p>Email: rickny.sanon@example.com</p>
+        </div>
+        <div class="team-member">
+            <h3>Sebastian</h3>
+            <p>Backend Developer</p>
+            <p>Email: sebastian@example.com</p>
+        </div>
+    </div>
+
+    <p style="margin-top: 40px;"><a href="{{ url_for('index') }}">Back to Home</a></p>
+</div>
+</body>
+</html>

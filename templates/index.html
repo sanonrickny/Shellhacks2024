@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Tactical Response City</title>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+   <style>
+       body, html {
+           margin: 0;
+           padding: 0;
+           width: 100%;
+           height: 100%;
+           overflow: hidden;
+           background-color: #111;
+           font-family: Arial, sans-serif;
+           color: white;
+       }
+
+
+       #threejs-container {
+           position: absolute;
+           top: 0;
+           bottom: 0;
+           width: 100%;
+           height: 100%;
+           background: radial-gradient(circle, #2c3e50, #000000);
+       }
+
+
+       #hud {
+           position: absolute;
+           top: 80px;
+           left: 20px;
+           padding: 15px;
+           background: rgba(0, 0, 0, 0.7);
+           border-radius: 8px;
+           z-index: 10;
+           font-size: 14px;
+           max-width: 250px;
+       }
+
+
+       #hud h3 {
+           margin: 0;
+           color: #00ffcc;
+           font-size: 16px;
+           margin-bottom: 10px;
+       }
+
+
+       #hud p {
+           margin: 5px 0;
+       }
+
+
+       #minimap {
+           position: absolute;
+           bottom: 20px;
+           right: 20px;
+           width: 150px;
+           height: 150px;
+           background: rgba(255, 255, 255, 0.2);
+           border: 2px solid #00ffcc;
+           z-index: 10;
+           border-radius: 50%;
+           display: flex;
+           align-items: center;
+           justify-content: center;
+           font-size: 12px;
+           color: #00ffcc;
+       }
+
+
+       #start-button {
+           position: absolute;
+           padding: 15px 30px;
+           font-size: 20px;
+           background-color: #f39c12;
+           color: white;
+           border: none;
+           border-radius: 10px;
+           cursor: pointer;
+           z-index: 10;
+           bottom: 20px;
+           left: 20px;
+       }
+
+
+       #start-button:hover {
+           background-color: #e67e22;
+       }
+
+
+       #nav-bar {
+           position: absolute;
+           top: 0;
+           left: 0;
+           width: 100%;
+           background: rgba(0, 0, 0, 0.8);
+           display: flex;
+           justify-content: center;
+           padding: 20px 0px;
+           z-index: 100;
+           color: white;
+       }
+
+
+       #nav-bar a {
+           color: #00ffcc;
+           text-decoration: none;
+           font-size: 18px;
+           margin: 0 20px;
+           transition: color 0.3s;
+       }
+
+
+       #nav-bar a:hover {
+           color: #f39c12;
+       }
+
+
+       #nav-title {
+           font-size: 28px;
+           font-weight: bold;
+           color: #00ffcc;
+       }
+   </style>
+</head>
+<body>
+
+
+<div id="threejs-container"></div>
+
+
+<!-- Navigation Bar -->
+<div id="nav-bar">
+   <div id="nav-title">Tactical Response City</div>
+   <div style="position: absolute; right: 30px;">
+       <a href="{{ url_for('about') }}">About</a>
+       <a href="{{ url_for('contact') }}">Contact</a>
+       <a href="{{ url_for('resource_request') }}">Resource Request</a>
+   </div>
+</div>
+
+
+<div id="hud">
+   <h3>Tactical Response Overview</h3>
+   <p>🟢 Low Priority</p>
+   <p>🟡 Medium Priority</p>
+   <p>🔴 High Priority</p>
+</div>
+
+
+<div id="minimap">Mini-Map</div>
+
+
+<a href="{{ url_for('dashboard') }}"><button id="start-button" onclick="startNextPage()">Start</button></a>
+
+
+<script>
+   // Basic Three.js setup
+   const scene = new THREE.Scene();
+   const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+   const renderer = new THREE.WebGLRenderer({ antialias: true });
+   renderer.setSize(window.innerWidth, window.innerHeight);
+   document.getElementById('threejs-container').appendChild(renderer.domElement);
+
+
+   // Enable shadows for added realism
+   renderer.shadowMap.enabled = true;
+   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+
+   // Lighting
+   const ambientLight = new THREE.AmbientLight(0x404040, 1.5);
+   scene.add(ambientLight);
+
+
+   const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+   directionalLight.position.set(100, 100, 50).normalize();
+   directionalLight.castShadow = true;
+   scene.add(directionalLight);
+
+
+   // Ground terrain with light reflections
+   const groundGeometry = new THREE.PlaneGeometry(500, 500);
+   const groundMaterial = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.6, metalness: 0.5 });
+   const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+   ground.rotation.x = -Math.PI / 2;
+   ground.receiveShadow = true;
+   scene.add(ground);
+
+
+   // Create road blocks
+   function createRoad(x, z, width, length) {
+       const roadGeometry = new THREE.BoxGeometry(width, 0.5, length);
+       const roadMaterial = new THREE.MeshStandardMaterial({ color: 0x000000 });
+       const road = new THREE.Mesh(roadGeometry, roadMaterial);
+       road.position.set(x, 0.25, z);
+       road.receiveShadow = true;
+       scene.add(road);
+
+
+       // Add yellow dashed lines
+       const lineGeometry = new THREE.PlaneGeometry(width, 0.2);
+       const lineMaterial = new THREE.MeshBasicMaterial({ color: 0xffff00 });
+       const line = new THREE.Mesh(lineGeometry, lineMaterial);
+       line.position.set(x, 0.26, z);
+       line.rotation.x = -Math.PI / 2;
+       scene.add(line);
+   }
+
+
+   // Creating a simple grid of roads
+   for (let i = -200; i <= 200; i += 50) {
+       createRoad(i, 0, 8, 500); // Vertical roads
+       createRoad(0, i, 500, 8); // Horizontal roads
+   }
+
+
+   // Create an emergency vehicle
+   function createVehicle(x, z, color = 0xff0000) {
+       const vehicleGeometry = new THREE.BoxGeometry(5, 3, 10);
+       const vehicleMaterial = new THREE.MeshStandardMaterial({ color: color });
+       const vehicle = new THREE.Mesh(vehicleGeometry, vehicleMaterial);
+       vehicle.position.set(x, 1.5, z);
+       vehicle.castShadow = true;
+       scene.add(vehicle);
+       return vehicle;
+   }
+
+
+   const emergencyVehicle = createVehicle(0, -200, 0x0000ff);
+
+
+   // Vehicle animation
+   function animateVehicle(vehicle) {
+       vehicle.position.z += 0.5; // Move vehicle along the Z-axis
+       if (vehicle.position.z > 250) vehicle.position.z = -250; // Loop vehicle back
+   }
+
+
+   // Building creation
+   function createBuilding(width, height, depth, x, z, color = 0x888888) {
+       const geometry = new THREE.BoxGeometry(width, height, depth);
+       const material = new THREE.MeshStandardMaterial({ color: color });
+       const building = new THREE.Mesh(geometry, material);
+       building.position.set(x, height / 2, z);
+       building.castShadow = true;
+       building.receiveShadow = true;
+       scene.add(building);
+       return building;
+   }
+
+
+   // Create some high-detail buildings
+   for (let i = 0; i < 50; i++) {
+       const width = Math.random() * 10 + 5;
+       const height = Math.random() * 60 + 20;
+       const depth = Math.random() * 10 + 5;
+       const x = (Math.random() - 0.5) * 400;
+       const z = (Math.random() - 0.5) * 400;
+       const color = `hsl(${Math.random() * 360}, 50%, 50%)`;
+       createBuilding(width, height, depth, x, z, color);
+   }
+
+
+   // Create trees
+   function createTree(x, z) {
+       // Tree trunk
+       const trunkGeometry = new THREE.CylinderGeometry(0.5, 0.5, 5, 8);
+       const trunkMaterial = new THREE.MeshStandardMaterial({ color: 0x8B4513 });
+       const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
+       trunk.position.set(x, 2.5, z);
+       trunk.castShadow = true;
+       scene.add(trunk);
+
+
+       // Foliage
+       const foliageGeometry = new THREE.SphereGeometry(3, 8, 8);
+       const foliageMaterial = new THREE.MeshStandardMaterial({ color: 0x228B22 });
+       const foliage = new THREE.Mesh(foliageGeometry, foliageMaterial);
+       foliage.position.set(x, 7, z);
+       foliage.castShadow = true;
+       scene.add(foliage);
+   }
+
+
+   // Place trees around the city
+   for (let i = 0; i < 30; i++) {
+       const x = (Math.random() - 0.5) * 400;
+       const z = (Math.random() - 0.5) * 400;
+       createTree(x, z);
+   }
+
+
+   // Camera positioning
+   camera.position.set(0, 150, 300);
+   camera.lookAt(0, 0, 0);
+
+
+   // Add interactivity and movement
+   function animate() {
+       requestAnimationFrame(animate);
+       scene.rotation.y += 0.0005; // Slow rotation to make it feel dynamic
+       animateVehicle(emergencyVehicle);
+       renderer.render(scene, camera);
+   }
+   animate();
+
+
+   // Function to navigate to the next HTML page
+   function startNextPage() {
+       window.location.href = "next-page.html"; // Replace with the actual name of your next HTML file
+   }
+
+
+   // Adjust on window resize
+   window.addEventListener('resize', () => {
+       renderer.setSize(window.innerWidth, window.innerHeight);
+       camera.aspect = window.innerWidth / window.innerHeight;
+       camera.updateProjectionMatrix();
+   });
+</script>
+
+
+</body>
+</html>
+
+
+
